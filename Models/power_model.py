@@ -1,6 +1,8 @@
 import concurrent.futures
+import multiprocessing 
 import numpy as np
 import psutil
+import GPUtil
 import platform
 import time
 
@@ -40,34 +42,56 @@ class PowerModel:
         children = parent.children(recursive=True)
 
         processes= [parent] + children
-        print(processes)
-                # Create a multiprocessing pool
         with concurrent.futures.ThreadPoolExecutor() as executor:
             results = executor.map(self.estimate_power_for_process, processes)
 
         dynamic_power = sum(results)
         return dynamic_power
 
-        # To do: Calculate not just for this process but all its children as well
-
     def estimate_power_for_process(self, process):
         capacitive_load = 1/1000 #1 micro farad
         capacitor_energy = self.capacitor_energy(capacitive_load,self.supply_voltage)
-        activity_factor = self.activity_factor(process, 0.1, 5)
-        dynamic_power = capacitor_energy * activity_factor
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            cpu = executor.map(self.activity_factor_cpu, [(process, 1, 5)])
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            gpu = executor.map(self.activity_factor_gpu, [(process, 1, 5)])
+        activity_factor_cpu = list(cpu)[0]
+        activity_factor_gpu = list(gpu)[0]
+        dynamic_power = (capacitor_energy * (activity_factor_cpu + activity_factor_gpu))
         return dynamic_power
     
     
     def capacitor_energy(self,capacitance, voltage):
         return 0.5*capacitance*voltage*voltage
 
-    def activity_factor(self,process, interval, duration):
-        # Current challenge of using this is that if the CPU utilisation is very low, it gives 0.0% utilisation
+    def activity_factor_cpu(self,tup):
+        process,interval,duration = tup[0],tup[1],tup[2]
         cpu_percentages = []
         for _ in range(int(duration / interval)):
             cpu_percentages.append(process.cpu_percent(interval=interval))
             time.sleep(interval)
         cpu_percent_end = process.cpu_percent(interval=None)
         activity_factor = abs((cpu_percent_end - np.mean(cpu_percentages))) / 100.0
+        return activity_factor
+    
+    def activity_factor_gpu(self, tup):
+        process,interval,duration = tup[0],tup[1],tup[2]
+        try:
+            gpu_percentages = []
+            for _ in range(int(duration / interval)):
+                gpu_list = GPUtil.getGPUs()
+                for gpu in gpu_list:
+                    for proc in gpu.getProcessUtilization(interval=interval):
+                        if proc.pid == process.pid:
+                            gpu_percentages.append(proc.gpuUtil)
+                            time.sleep(interval)
+            gpu_percent_end = 0.0
+            for gpu in gpu_list:
+                for proc in gpu.getProcessUtilization(interval=None):
+                    if proc.pid == process.pid:
+                        gpu_percent_end = proc.gpuUtil
+            activity_factor = abs((gpu_percent_end - np.mean(gpu_percentages))) / 100.0
+        except:
+            activity_factor = 0.0
         return activity_factor
     
