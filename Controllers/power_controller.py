@@ -12,12 +12,13 @@ class PowerController:
 
         processes = []
         for proc in psutil.process_iter(['pid', 'name']):
+            # Only get the parent proccess
             processes.append(proc.info) if proc.parent() is None else next
         endcon = False
         self.view.display_processes(processes)
         selection = self.view.get_user_selection()
         while not endcon:
-            if selection == 9999:
+            if selection == 00000:
                 endcon = True
             pid = processes[selection-1]['pid']
             try:
