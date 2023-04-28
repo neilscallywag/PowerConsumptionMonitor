@@ -10,9 +10,8 @@ class PowerModel:
         self.supply_voltage = 0
 
     def get_system_info(self):
-        self.clock_frequency = psutil.cpu_freq().current/1000 # to convert to ghz
+        self.clock_frequency = psutil.cpu_freq().current
         self.num_cores = psutil.cpu_count(logical=False)
-
         if platform.system() == 'Windows':
             from Utils import windows_utils
             self.clock_frequency =windows_utils. get_clock_frequency()
@@ -45,16 +44,28 @@ class PowerModel:
         We can estimate capacitive load using RSS
         """        
         process = psutil.Process(pid)
+        # To do: Calculate not just for this process but all its children as well
         memory_info = process.memory_info()
 
         capacitive_load = memory_info.rss
 
         capacitor_energy = self.capacitor_energy(capacitive_load,self.supply_voltage)
 
-        print (capacitive_load,capacitor_energy,self.clock_frequency)
-        dynamic_power = capacitor_energy* self.clock_frequency 
-        return dynamic_power
-    
+        activity_factor = self.activity_factor(process,0.5,5)
+        print (capacitive_load,capacitor_energy,activity_factor)
+        dynamic_power = capacitor_energy* activity_factor
+        return dynamic_power/60
+
     def capacitor_energy(self,capacitance, voltage):
         return 0.5*capacitance*voltage*voltage
+
+    def activity_factor(self,process, interval, duration):
+        cpu_percentages = []
+
+        for _ in range(int(duration / interval)):
+            cpu_percentages.append(process.cpu_percent(interval=interval))
+            time.sleep(interval)
+        print(cpu_percentages)
+        activity_factor = np.mean(cpu_percentages)/100
+        return activity_factor
     

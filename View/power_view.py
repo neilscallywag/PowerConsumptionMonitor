@@ -12,4 +12,4 @@ class PowerView:
         return int(input("Enter the process number: "))
 
     def display_power_consumption(self, process_name, power_consumption):
-        print(f"Estimated dynamic power consumption of the {process_name}: {power_consumption:.10f} watts")
+        print(f"Estimated dynamic power consumption of the {process_name}: {power_consumption:.10f} watts per hour")
