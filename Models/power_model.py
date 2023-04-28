@@ -1,3 +1,4 @@
+import concurrent.futures
 import numpy as np
 import psutil
 import platform
@@ -32,30 +33,31 @@ class PowerModel:
 
         Instead we are going to use indirect measures to calculate using the standard Power Formula. 
 
-        Capacitive loads are the third type, and are opposite of inductive loads.
-        Capacitive loads include energy stored in materials and devices, such as capacitors,
-        and cause changes in voltage to lag behind changes in current (https://www.ascopower.com/uk/en/resources/articles/capacitive-load-banks.jsp).
-        
-        For most circuits, the major component of power consumption is switching power, which is consumed whenever a gate switches
-        (i.e., the capacitive load driven by the gate is charged/discharged). 
-        
-        
-        In computing, resident set size (RSS) is the portion of memory (measured in kilobytes) occupied by a process that is held in main memory (RAM) (wiki).
-        We can estimate capacitive load using RSS
+        Power Consumption formula here only considers dynamic power. 
+        https://semiengineering.com/knowledge_centers/low-power/low-power-design/power-consumption/
         """        
-        process = psutil.Process(pid)
+        parent = psutil.Process(pid)
+        children = parent.children(recursive=True)
+
+        processes= [parent] + children
+        print(processes)
+                # Create a multiprocessing pool
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            results = executor.map(self.estimate_power_for_process, processes)
+
+        dynamic_power = sum(results)
+        return dynamic_power
+
         # To do: Calculate not just for this process but all its children as well
-        memory_info = process.memory_info()
 
-        capacitive_load = memory_info.rss
-
+    def estimate_power_for_process(self, process):
+        capacitive_load = 1/1000 #1 micro farad
         capacitor_energy = self.capacitor_energy(capacitive_load,self.supply_voltage)
-
-        activity_factor = self.activity_factor(process,0.1,5)
-        print (capacitive_load,capacitor_energy,activity_factor)
-        dynamic_power = capacitor_energy* activity_factor
-        return dynamic_power/60
-
+        activity_factor = self.activity_factor(process, 0.1, 5)
+        dynamic_power = capacitor_energy * activity_factor
+        return dynamic_power
+    
+    
     def capacitor_energy(self,capacitance, voltage):
         return 0.5*capacitance*voltage*voltage
 
@@ -66,6 +68,6 @@ class PowerModel:
             cpu_percentages.append(process.cpu_percent(interval=interval))
             time.sleep(interval)
         cpu_percent_end = process.cpu_percent(interval=None)
-        activity_factor = (cpu_percent_end - np.mean(cpu_percentages)) / 100.0
+        activity_factor = abs((cpu_percent_end - np.mean(cpu_percentages))) / 100.0
         return activity_factor
     

@@ -13,7 +13,7 @@ class PowerController:
         processes = []
         for proc in psutil.process_iter(['pid', 'name']):
             # Only get the parent proccess
-            processes.append(proc.info)
+            processes.append(proc.info) if proc.parent() is None else None
         endcon = False
         self.view.display_processes(processes)
         selection = self.view.get_user_selection()
