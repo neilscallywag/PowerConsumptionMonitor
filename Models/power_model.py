@@ -51,7 +51,7 @@ class PowerModel:
 
         capacitor_energy = self.capacitor_energy(capacitive_load,self.supply_voltage)
 
-        activity_factor = self.activity_factor(process,0.5,5)
+        activity_factor = self.activity_factor(process,0.1,5)
         print (capacitive_load,capacitor_energy,activity_factor)
         dynamic_power = capacitor_energy* activity_factor
         return dynamic_power/60
@@ -60,12 +60,12 @@ class PowerModel:
         return 0.5*capacitance*voltage*voltage
 
     def activity_factor(self,process, interval, duration):
+        # Current challenge of using this is that if the CPU utilisation is very low, it gives 0.0% utilisation
         cpu_percentages = []
-
         for _ in range(int(duration / interval)):
             cpu_percentages.append(process.cpu_percent(interval=interval))
             time.sleep(interval)
-        print(cpu_percentages)
-        activity_factor = np.mean(cpu_percentages)/100
+        cpu_percent_end = process.cpu_percent(interval=None)
+        activity_factor = (cpu_percent_end - np.mean(cpu_percentages)) / 100.0
         return activity_factor
     
