@@ -10,7 +10,7 @@ class PowerModel:
         self.supply_voltage = 0
 
     def get_system_info(self):
-        self.clock_frequency = psutil.cpu_freq().current 
+        self.clock_frequency = psutil.cpu_freq().current/1000 # to convert to ghz
         self.num_cores = psutil.cpu_count(logical=False)
 
         if platform.system() == 'Windows':
@@ -51,20 +51,10 @@ class PowerModel:
 
         capacitor_energy = self.capacitor_energy(capacitive_load,self.supply_voltage)
 
-        activity_factor = self.activity_factor(process,1,5)
-        print (capacitive_load,capacitor_energy,self.clock_frequency,activity_factor)
-        dynamic_power = capacitor_energy* self.clock_frequency * activity_factor
+        print (capacitive_load,capacitor_energy,self.clock_frequency)
+        dynamic_power = capacitor_energy* self.clock_frequency 
         return dynamic_power
     
     def capacitor_energy(self,capacitance, voltage):
         return 0.5*capacitance*voltage*voltage
     
-    def activity_factor(self,process, interval, duration):
-        cpu_percentages = []
-
-        for _ in range(int(duration / interval)):
-            cpu_percentages.append(process.cpu_percent(interval=interval))
-            time.sleep(interval)
-
-        activity_factor = np.mean(cpu_percentages)
-        return activity_factor
