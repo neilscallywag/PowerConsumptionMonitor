@@ -27,7 +27,7 @@ try:
             for chip in sensors.iter_detected_chips():
                 for feature in chip:
                     if feature.label == "CPU Temp":
-                        return feature.get_value()
+                        return float(feature.get_value())
         finally:
             sensors.cleanup()
         return 0.0
