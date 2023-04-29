@@ -119,10 +119,11 @@ class PowerModel:
         #Previous implementation was doing something similar to the CPu activity factor method.
         #However, there is no direct way to isolate process id in this library. On the other hand,
         #This library does give you overall GPU load normalised between 0-1
+
+        # Another issue is that in linux, for some reason the library fails to detect GPU. It could simply just be an error
+        # On my part in failing to set up my Virtual Machine properly. However, as it stands, i do not have a solution for this.
         gpu_list = GPUtil.getGPUs()
-        print("gpu list: ",gpu_list)
         for gpu in gpu_list:
-            print("load: ",gpu.load)
-            return gpu.load 
+            return gpu.load if gpu.load is not None else 0.0
 
 
