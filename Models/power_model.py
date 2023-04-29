@@ -109,8 +109,10 @@ class PowerModel:
         for _ in range(int(duration / interval)):
             cpu_percentages.append(process.cpu_percent(interval=interval))
             time.sleep(interval)
+        print("CPU percentage: ", cpu_percentages)
         cpu_percent_end = process.cpu_percent(interval=None)
         activity_factor = abs((cpu_percent_end - np.mean(cpu_percentages))) / 100.0
+        print("CPU AF: ", activity_factor)
         return activity_factor
 
     def activity_factor_gpu(self, tup):
@@ -129,7 +131,11 @@ class PowerModel:
                 for proc in gpu.getProcessUtilization(interval=None):
                     if proc.pid == process.pid:
                         gpu_percent_end = proc.gpuUtil
+            print("CPU percentage: ", gpu_percentages)
+
             activity_factor = abs((gpu_percent_end - np.mean(gpu_percentages))) / 100.0
+            print("GPU AF: ", activity_factor)
+
         except:
             activity_factor = 0.0
         return activity_factor
