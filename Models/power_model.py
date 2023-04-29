@@ -106,7 +106,8 @@ class PowerModel:
 
 
     def activity_factor_cpu(self, tup):
-        # The issue here is that the CPU activity unless it is a resource heavy application, is always 0 due to accuracy of the library
+        # The issue here is that the CPU activity unless it is a resource heavy application,
+        #  is almost always 0 due to 2f accuracy of the library
 
         process, interval, duration = tup[0], tup[1], tup[2]
         cpu_percentages = []
