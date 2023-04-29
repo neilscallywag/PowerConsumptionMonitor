@@ -93,7 +93,7 @@ class PowerModel:
 
         # Include static power estimation
         k = 1e-6  # Constant for static power, adjust according to processor technology. Ideally you would want to have this information as well
-        temperature =  + 273.15  # Assuming room temperature (in Kelvin)
+        temperature =  self.temperature + 273.15  # Assuming room temperature (in Kelvin)
         static_power = k * self.supply_voltage ** 2 * temperature
 
         # Total power is the sum of dynamic and static power
