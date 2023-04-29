@@ -66,8 +66,8 @@ class PowerModel:
         not even be constant per IO event.
 
         //PS this is the best i could do in the short amount of time I have had. I asked the HR if it could be postponed as this task was
-        // given to us during my finals exam. I could only allot 2-3 days doing this. 
-        
+        // given to us during my finals exam. I could only allot 2-3 days doing this on a windows machine with limited computational resources.
+
         Sources: 
         https://community.intel.com/t5/Processors/Processor-Power-calculation/td-p/299459
         https://www.easycalculation.com/physics/electromagnetism/cpu-power-consumption.php
