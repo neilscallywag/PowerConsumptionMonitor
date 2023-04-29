@@ -1,4 +1,5 @@
 import subprocess
+import psutil
 
 def get_clock_frequency():
     p = subprocess.Popen(['wmic', 'cpu', 'get', 'CurrentClockSpeed'], stdout=subprocess.PIPE)
@@ -8,3 +9,4 @@ def get_clock_frequency():
 def get_supply_voltage():
     # Use the default value for Windows
     return 2
+
