@@ -23,13 +23,14 @@ try:
     
     def get_temperature():
         sensors.init()
-        temperatures = sensors.get_temperatures()
-        for temp in temperatures:
-            if temp.label.startswith("coretemp"):
-               return temp.current_value
-
-        # Cleanup the sensors library
-        sensors.cleanup()
+        try:
+            for chip in sensors.iter_detected_chips():
+                for feature in chip:
+                    if feature.label == "CPU Temp":
+                        return feature.get_value()
+        finally:
+            sensors.cleanup()
+        return 0.0
 except ModuleNotFoundError:
     print("Sensors module not found")
 
