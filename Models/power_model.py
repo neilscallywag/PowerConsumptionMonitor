@@ -115,29 +115,13 @@ class PowerModel:
         print("CPU AF: ", activity_factor)
         return activity_factor
 
-    def activity_factor_gpu(self, tup):
-        process, interval, duration = tup[0], tup[1], tup[2]
-        try:
-            gpu_percentages = []
-            for _ in range(int(duration / interval)):
-                gpu_list = GPUtil.getGPUs()
-                for gpu in gpu_list:
-                    for proc in gpu.getProcessUtilization(interval=interval):
-                        if proc.pid ==                         process.pid:
-                            gpu_percentages.append(proc.gpuUtil)
-                            time.sleep(interval)
-            gpu_percent_end = 0.0
-            for gpu in gpu_list:
-                for proc in gpu.getProcessUtilization(interval=None):
-                    if proc.pid == process.pid:
-                        gpu_percent_end = proc.gpuUtil
-            print("CPU percentage: ", gpu_percentages)
-
-            activity_factor = abs((gpu_percent_end - np.mean(gpu_percentages))) / 100.0
-            print("GPU AF: ", activity_factor)
-
-        except:
-            activity_factor = 0.0
-        return activity_factor
+    def activity_factor_gpu(self, *args):
+        #Previous implementation was doing something similar to the CPu activity factor method.
+        #However, there is no direct way to isolate process id in this library. On the other hand,
+        #This library does give you overall GPU load normalised between 0-1
+        gpu_list = GPUtil.getGPUs()
+        for gpu in gpu_list:
+            print("gpu load", gpu.load)
+            return gpu.load
 
 
