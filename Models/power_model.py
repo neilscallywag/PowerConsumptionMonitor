@@ -123,7 +123,9 @@ class PowerModel:
         # Another issue is that in linux, for some reason the library fails to detect GPU. It could simply just be an error
         # On my part in failing to set up my Virtual Machine properly. However, as it stands, i do not have a solution for this.
         gpu_list = GPUtil.getGPUs()
-        for gpu in gpu_list:
-            return gpu.load if gpu.load is not None else 0.0
+        if len(gpu_list) >0:
+            for gpu in gpu_list:
+                return gpu.load
+        return 0.0
 
 
