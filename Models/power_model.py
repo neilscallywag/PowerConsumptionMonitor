@@ -115,13 +115,14 @@ class PowerModel:
         print("CPU AF: ", activity_factor)
         return activity_factor
 
-    def activity_factor_gpu(self, *args):
+    def activity_factor_gpu(self, args):
         #Previous implementation was doing something similar to the CPu activity factor method.
         #However, there is no direct way to isolate process id in this library. On the other hand,
         #This library does give you overall GPU load normalised between 0-1
         gpu_list = GPUtil.getGPUs()
+        print("gpu list: ",gpu_list)
         for gpu in gpu_list:
-            print("gpu load", gpu.load)
-            return gpu.load
+            print("load: ",gpu.load)
+            return gpu.load 
 
 
