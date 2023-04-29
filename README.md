@@ -1,4 +1,4 @@
-# Project Title
+# Power Consumption Application
 
 The goal of this project is to estimate the power consumption of running processes on a computer. This document will provide an overview of the code base and how to use it. It uses the standard power formula to estimate the power consumption i.e 
 ```math
