@@ -1,7 +1,5 @@
-# power_view.py
 import tkinter as tk
 from tkinter import ttk
-from tkinter import StringVar
 
 class PowerView:
     def __init__(self, calculate_callback, root=None):
@@ -9,7 +7,8 @@ class PowerView:
         self.root.title("Power Consumption Estimator")
         self.calculate_callback = calculate_callback
 
-        self.processes = []  # Initialize the 'processes' attribute as a list
+        self.processes = []  
+        self.index_to_pid = {}  
         self.create_widgets()
 
     def create_widgets(self):
@@ -50,20 +49,29 @@ class PowerView:
             return
         search_term = self.search_var.get().lower()
         self.processes_list.delete(0, tk.END)
-        for proc in self.processes:
+        self.index_to_pid.clear()  
+        for index, proc in enumerate(self.processes):
             if search_term in proc['name'].lower():
-                self.processes_list.insert(tk.END, f"{proc['name']} ({proc['pid']})")
+                item = f"{proc['name']} ({proc['pid']})"
+                self.processes_list.insert(tk.END, item)
+                self.index_to_pid[self.processes_list.size() - 1] = proc['pid']  
+
+
 
     def calculate_power_consumption(self):
         selected_index = self.processes_list.curselection()
         if not selected_index:
             return
 
-        selected_process = self.processes[selected_index[0]]
+        selected_pid = self.index_to_pid[selected_index[0]]  # Get the process id from the index_to_pid mapping
+        selected_process = next(proc for proc in self.processes if proc['pid'] == selected_pid)  # Find the process by its id
+
         self.loader_label.config(text="Calculating power consumption...")
         self.root.update()
 
         self.calculate_callback(selected_process)  # Use the calculate_callback
+
+
 
     def clear_search_placeholder(self, event=None):
         self.search_var.set("")
