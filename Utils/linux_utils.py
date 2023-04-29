@@ -15,6 +15,16 @@ try:
                         supply_voltage = feature.get_value()
         sensors.cleanup()
         return supply_voltage
+    
+    def get_temperature():
+        sensors.init()
+        for chip in sensors.iter_detected_chips():
+            if chip.prefix == "coretemp":
+                for feature in chip:
+                    if "temp" in feature.label:
+                        temperature = feature.get_value()
+        sensors.cleanup()
+        return temperature
 except ModuleNotFoundError:
     print("Sensors module not found")
 

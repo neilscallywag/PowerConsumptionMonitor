@@ -20,6 +20,7 @@ class PowerController:
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return parent_processes
+    
     def calculate_power_consumption(self, selected_process):
         self.view.loader_label.config(text="Calculating power consumption...")
         self.view.root.update()
@@ -34,6 +35,7 @@ class PowerController:
 
         self.view.loader_label.config(text="")
         self.view.results_label.config(text=f"Estimated dynamic power consumption of {selected_process['name']}: {power_consumption:.10f} watts per hour")
+    
     def run(self):
         self.model.get_system_info()
         processes = self.get_parent_processes()
