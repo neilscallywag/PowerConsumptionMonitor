@@ -32,8 +32,9 @@ class PowerModel:
     def estimate_power_consumption(self, pid):
         parent = psutil.Process(pid)
         children = parent.children(recursive=True)
-
+        # Do not for the love of god select systemd process on linux as it will recursively call all its children into the list 
         processes = [parent] + children
+
         with concurrent.futures.ThreadPoolExecutor() as executor:
             results = executor.map(self.estimate_power_for_process, processes)
 

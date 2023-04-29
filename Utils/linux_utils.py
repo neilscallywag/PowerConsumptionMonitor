@@ -11,14 +11,15 @@ try:
             return 0.0
 
     def get_supply_voltage():
-        output = subprocess.check_output(['sensors', '-u'])
-        for line in output.decode().split('\n'):
-            if line.startswith('coretemp'):
-                parts = line.split(':')
-                if len(parts) == 2:
-                    voltage_str = parts[1].strip().split(' ')[0]
-                    return float(voltage_str)
-        else: return 0
+        sensors.init()
+        try:
+            for chip in sensors.iter_detected_chips():
+                for feature in chip:
+                    if feature.label == "Vcore":
+                        return float(feature.get_value())
+        finally:
+            sensors.cleanup()
+        return 0.0
 
     
     def get_temperature():
