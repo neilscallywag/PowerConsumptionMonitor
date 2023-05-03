@@ -3,7 +3,6 @@ import numpy as np
 import psutil
 import GPUtil
 import platform
-import time
 
 class PowerModel:
     def __init__(self):
